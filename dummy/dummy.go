@@ -36,3 +36,7 @@ func Randomcurrency() string{
 	l := len(c)
 	return c[rand.Intn(l)]
 }
+
+func Nothing() {
+	println("nothing")
+}
