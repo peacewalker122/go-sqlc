@@ -40,6 +40,7 @@ func Randomcurrency() string {
 }
 
 // it's nothing just a dummy to test the git
+// second test for the git
 func Nothing() {
 	println("nothing")
 }
