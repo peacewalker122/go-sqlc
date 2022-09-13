@@ -77,7 +77,7 @@ func TestListAccount(t *testing.T){
 		Limit:  5,
 		Offset: 5,
 	}
-	account,err := Testqueries.ListAccount(context.Background(), arg)
+	account,err := Testqueries.ListAccounts(context.Background(), arg)
 	require.NoError(t,err)
 	require.Len(t,account,5)
 

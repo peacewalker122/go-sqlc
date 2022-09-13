@@ -121,34 +121,35 @@ type ListAccountParams struct {
 	Offset int32 `json:"offset"`
 }
 
-func (q *Queries) ListAccount(ctx context.Context, arg ListAccountParams) ([]Account, error) {
-	rows, err := q.db.QueryContext(ctx, listAccount, arg.Limit, arg.Offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Account
-	for rows.Next() {
-		var i Account
-		if err := rows.Scan(
-			&i.ID,
-			&i.Owner,
-			&i.Balance,
-			&i.Currency,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) ListAccounts(ctx context.Context, arg ListAccountParams) ([]Account, error) {
+    rows, err := q.db.QueryContext(ctx, listAccount, arg.Limit, arg.Offset)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    var items []Account
+    for rows.Next() {
+        var i Account
+        if err := rows.Scan(
+            &i.ID,
+            &i.Owner,
+            &i.Balance,
+            &i.Currency,
+            &i.CreatedAt,
+        ); err != nil {
+            return nil, err
+        }
+        items = append(items, i)
+    }
+    if err := rows.Close(); err != nil {
+        return nil, err
+    }
+    if err := rows.Err(); err != nil {
+        return nil, err
+    }
+    return items, nil
 }
+
 
 const updateAccount = `-- name: UpdateAccount :one
 UPDATE accounts
