@@ -10,3 +10,5 @@ migratedown:
 	migrate -path db/migration -database "postgresql://postgres:test123@localhost:5432/simple_bank" -verbose down
 sqlc:
 	sqlc generate
+test:
+	go test -v ./...
