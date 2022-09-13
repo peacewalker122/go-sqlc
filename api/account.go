@@ -74,7 +74,7 @@ func (server *server) listAccount(ctx *gin.Context) {
         return
     }
 
-    arg := db.ListAccountParams{
+    arg := db.ListAccountsParams{
         Limit:  req.pageSize,
         Offset: (req.pageID - 1) * req.pageSize,
     }

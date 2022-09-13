@@ -73,7 +73,7 @@ func TestListAccount(t *testing.T){
 	for i:=0;i<10;i++{
 		createRandomAccount(t)
 	}
-	arg := ListAccountParams{
+	arg := ListAccountsParams{
 		Limit:  5,
 		Offset: 5,
 	}
