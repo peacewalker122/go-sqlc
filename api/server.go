@@ -10,10 +10,10 @@ import (
 
 type server struct {
 	router *gin.Engine
-	store  *db.Store
+	store db.Store
 }
 
-func Newserver(store *db.Store) *server {
+func Newserver(store db.Store) *server {
 	server := &server{store: store}
 	router := gin.Default()
 
@@ -31,7 +31,7 @@ func (s *server) Runserver(target string) error {
 func errorvalidator(err error) gin.H {
 	ermsg := []string{}
 	for _, e := range err.(validator.ValidationErrors) {
-		errmsg := fmt.Sprintf("error field %s, because %s", e.Field(), e.ActualTag())
+		errmsg := fmt.Sprintf("error happen in %s, due %s", e.Field(), e.Error())
 		ermsg = append(ermsg, errmsg)
 	}
 	r := gin.H{

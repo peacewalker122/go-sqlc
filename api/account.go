@@ -2,10 +2,12 @@ package api
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	db "sqlc/db/sqlc"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 type createAccountParam struct {
@@ -63,28 +65,29 @@ func (s *server) getaccountid(c *gin.Context) {
 }
 
 type listAccountRequest struct {
-	pageID   int32 `form:"pageid" binding:"required,min=1"`
-	pageSize int32 `form:"pagesize" binding:"required,min=5,max=10"`
+	PageID   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=50"`
 }
 
 func (server *server) listAccount(ctx *gin.Context) {
-    var req listAccountRequest
-    if err := ctx.ShouldBindQuery(&req); err != nil {
-        ctx.JSON(http.StatusBadRequest, errorhandle(err))
-        return
-    }
+	var req listAccountRequest
+	if err := ctx.ShouldBindWith(&req, binding.Query); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorvalidator(err))
+		return
+	}
 
-    arg := db.ListAccountsParams{
-        Limit:  req.pageSize,
-        Offset: (req.pageID - 1) * req.pageSize,
-    }
+	log.Println(req.PageSize, " and ", req.PageID)
 
-    accounts, err := server.store.ListAccounts(ctx, arg)
-    if err != nil {
-        ctx.JSON(http.StatusInternalServerError, errorhandle(err))
-        return
-    }
+	arg := db.ListAccountsParams{
+		Limit:  req.PageSize,
+		Offset: (req.PageID - 1) * req.PageSize,
+	}
 
-    ctx.JSON(http.StatusOK, accounts)
+	accounts, err := server.store.ListAccounts(ctx, arg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorhandle(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, accounts)
 }
-

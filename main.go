@@ -5,23 +5,25 @@ import (
 	"log"
 	"sqlc/api"
 	db "sqlc/db/sqlc"
+
+	"sqlc/util"
+	_ "github.com/golang/mock/mockgen/model"
 	_ "github.com/lib/pq"
 )
 
-const (
-	DBdriver = "postgres"
-	DBsource = "postgresql://postgres:test123@localhost:5432/simple_bank?sslmode=disable"
-)
-
 func main() {
-	conn, err := sql.Open(DBdriver, DBsource)
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("can't definef config ", err.Error())
+	}
+	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal(err)
 	}
 	store := db.Newstore(conn)
 	server := api.Newserver(store)
 
-	err = server.Runserver("localhost:8080")
+	err = server.Runserver(config.ServerAddress)
 	if err != nil {
 		log.Fatal("can't establish connection due ", err.Error())
 	}

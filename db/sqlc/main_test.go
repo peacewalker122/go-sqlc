@@ -4,21 +4,21 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"sqlc/util"
 	"testing"
-	_ "github.com/lib/pq"
-)
 
-const (
-	DBdriver = "postgres"
-	DBsource = "postgresql://postgres:test123@localhost:5432/simple_bank"
+	_ "github.com/lib/pq"
 )
 
 var Testqueries *Queries
 var TestDB *sql.DB
 
 func TestMain(m *testing.M) {
-	var err error
-	TestDB, err = sql.Open(DBdriver, DBsource)
+	config, err := util.LoadConfig("../..")
+	if err != nil {
+		log.Fatal("can't definef config ", err.Error())
+	}
+	TestDB, err = sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal(err)
 	}
