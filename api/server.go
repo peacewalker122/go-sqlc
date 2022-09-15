@@ -1,7 +1,9 @@
 package api
 
 import (
+	"database/sql"
 	"fmt"
+	"net/http"
 	db "sqlc/db/sqlc"
 
 	"github.com/gin-gonic/gin"
@@ -20,6 +22,7 @@ func Newserver(store db.Store) *server {
 	router.POST("/accounts", server.createAccount)
 	router.GET("/accounts/:id", server.getaccountid)
 	router.GET("/accounts", server.listAccount)
+	router.POST("/transfers", server.Transfertx)
 	server.router = router
 	return server
 }
@@ -45,4 +48,22 @@ func errorhandle(err error) gin.H {
 		"errors": err.Error(),
 	}
 	return r
+}
+
+func(s *server) transferValidator(c *gin.Context, accountID int64, currency string) bool{
+	account,err := s.store.GetAccount(c,accountID)
+	if err != nil {
+		if err == sql.ErrNoRows{
+			c.JSON(http.StatusBadRequest, errorhandle(err))
+			return false
+		}
+		c.JSON(http.StatusInternalServerError,errorhandle(err))
+		return false
+	}
+	if account.Currency != currency{
+		err := fmt.Errorf("Different Currency, expected %v",account.Currency)
+		c.JSON(http.StatusBadRequest,errorhandle(err))
+		return false
+	}
+	return true
 }

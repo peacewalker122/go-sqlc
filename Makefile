@@ -1,3 +1,5 @@
+open:
+	psql -U postgres -d simple_bank
 postgres:
 	postgres12 -p 5432:5432 -e POSTGRES_USER=golang -e POSTGRES_PASSWORD=test123 -d postgres:12-alpine
 createdb:
