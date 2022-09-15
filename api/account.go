@@ -12,7 +12,7 @@ import (
 
 type createAccountParam struct {
 	Owner    string `json:"owner" binding:"required"`
-	Currency string `json:"currency" binding:"required,oneof=USD EUR IDR"`
+	Currency string `json:"currency" binding:"required,oneof=USD EUR IDR GBP"`
 }
 
 func (s *server) createAccount(c *gin.Context) {
@@ -54,10 +54,10 @@ func (s *server) getaccountid(c *gin.Context) {
 	getid, err := s.store.GetAccount(c, res.ID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusBadRequest, errorhandle(err))
+			c.JSON(http.StatusNotFound, errorhandle(err))
 			return
 		}
-		c.JSON(http.StatusBadRequest, errorhandle(err))
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
 		return
 	}
 

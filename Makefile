@@ -11,6 +11,8 @@ migratedown:
 sqlc:
 	sqlc generate
 test:
-	go test -v ./...
+	go test -v ./... -cover
 server:
 	go run main.go
+mock:
+	 mockgen -package mockdb -destination db/mock/store.go sqlc/db/sqlc Store
