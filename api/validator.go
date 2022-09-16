@@ -12,12 +12,13 @@ import (
 func errorvalidator(err error) gin.H {
 	ermsg := []string{}
 	for _, e := range err.(validator.ValidationErrors) {
-		errmsg := fmt.Sprintf("error happen in %s, due %s", e.Field(), e.Error())
+		errmsg := fmt.Sprintf("error happen in %s, due %s, expected %s", e.Field(), e.Value(), e.Param())
 		ermsg = append(ermsg, errmsg)
 	}
-	r := gin.H{
-		"errors": ermsg,
-	}
+		r := gin.H{
+			"errors": ermsg,
+		}
+	
 	return r
 }
 

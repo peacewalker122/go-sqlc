@@ -10,7 +10,7 @@ import (
 	"net/http/httptest"
 	mockdb "sqlc/db/mock"
 	db "sqlc/db/sqlc"
-	"sqlc/dummy"
+	"sqlc/util"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -110,10 +110,10 @@ func TestGetByID(t *testing.T) {
 
 func randomacc() db.Account {
 	return db.Account{
-		ID:       dummy.Randomint(1, 1000),
-		Owner:    dummy.Randomowner(),
-		Balance:  dummy.Randommoney(),
-		Currency: dummy.Randomcurrency(),
+		ID:       util.Randomint(1, 1000),
+		Owner:    util.Randomowner(),
+		Balance:  util.Randommoney(),
+		Currency: util.Randomcurrency(),
 	}
 }
 

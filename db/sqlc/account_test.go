@@ -3,17 +3,19 @@ package db
 import (
 	"context"
 	"database/sql"
-	"sqlc/dummy"
+	"sqlc/util"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func createRandomAccount(t *testing.T) Account {
+	user := createRandomUser(t)
+
 	arg := CreateAccountParams{
-		Owner:    dummy.Randomowner(),
-		Balance:  dummy.Randommoney(),
-		Currency: dummy.Randomcurrency(),
+		Owner:    user.Username,
+		Balance:  util.Randommoney(),
+		Currency: util.Randomcurrency(),
 	}
 	account, err := Testqueries.CreateAccount(context.Background(), arg)
 	require.NoError(t, err)
@@ -45,7 +47,7 @@ func TestUpdateAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 	arg := UpdateAccountParams{
 		ID:      account1.ID,
-		Balance: dummy.Randommoney(),
+		Balance: util.Randommoney(),
 	}
 	account2, err := Testqueries.UpdateAccount(context.Background(), arg)
 	require.NoError(t, err)
@@ -61,27 +63,27 @@ func TestDeleteAccount(t *testing.T) {
 	account1 := createRandomAccount(t)
 
 	err := Testqueries.DeleteAccount(context.Background(), account1.ID)
-	require.NoError(t,err)
+	require.NoError(t, err)
 
-	account2,err := Testqueries.GetAccount(context.Background(), account1.ID)
-	require.Error(t,err)
-	require.EqualError(t,err,sql.ErrNoRows.Error())
-	require.Empty(t,account2)
+	account2, err := Testqueries.GetAccount(context.Background(), account1.ID)
+	require.Error(t, err)
+	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.Empty(t, account2)
 }
 
-func TestListAccount(t *testing.T){
-	for i:=0;i<10;i++{
+func TestListAccount(t *testing.T) {
+	for i := 0; i < 10; i++ {
 		createRandomAccount(t)
 	}
 	arg := ListAccountsParams{
 		Limit:  5,
 		Offset: 5,
 	}
-	account,err := Testqueries.ListAccounts(context.Background(), arg)
-	require.NoError(t,err)
-	require.Len(t,account,5)
+	account, err := Testqueries.ListAccounts(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, account, 5)
 
-	for _,Account := range account{
-		require.NotEmpty(t,Account)
+	for _, Account := range account {
+		require.NotEmpty(t, Account)
 	}
 }

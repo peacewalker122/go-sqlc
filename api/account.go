@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/lib/pq"
 )
 
 type createAccountParam struct {
@@ -32,10 +33,20 @@ func (s *server) createAccount(c *gin.Context) {
 
 	account, err := s.store.CreateAccount(c, arg)
 	if err != nil {
-		r := errorvalidator(err)
-		c.JSON(http.StatusBadRequest, r)
+
+		if PqErr,ok := err.(*pq.Error); ok{
+			switch PqErr.Code.Name() {
+			case "foreign_key_violation","unique_violation":
+				c.JSON(http.StatusForbidden,errorhandle(err))
+				return
+			}
+		}
+
+		r := errorhandle(err)
+		c.JSON(http.StatusInternalServerError, r)
 		return
 	}
+	
 	c.JSON(http.StatusOK, account)
 }
 
