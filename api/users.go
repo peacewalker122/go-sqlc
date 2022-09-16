@@ -21,7 +21,6 @@ type userResp struct {
 	Username string `json:"username"`
 	Fullname string `json:"full_name"`
 	Email string `json:"email"`
-	Pass string `json:"pass"`
 	PasswordChange time.Time `json:"password_change"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -65,7 +64,6 @@ func (s *server) createUser(c *gin.Context) {
 		Username:       account.Username,
 		Fullname:       account.FullName,
 		Email:          account.Email,
-		Pass:           req.Password,
 		PasswordChange: account.PasswordChangedAt,
 		CreatedAt:      account.CreatedAt,
 	}
