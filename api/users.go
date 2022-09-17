@@ -11,7 +11,7 @@ import (
 )
 
 type createUserParam struct {
-	Username string `json:"username" binding:"required,alpha"`
+	Username string `json:"username" binding:"required,alphanum"`
 	Password string `json:"password" binding:"required,min=6"`
 	Fullname string `json:"full_name" binding:"required,alpha"`
 	Email    string `json:"email" binding:"required,email"`
