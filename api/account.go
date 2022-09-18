@@ -12,7 +12,7 @@ import (
 )
 
 type createAccountParam struct {
-	Owner    string `json:"owner" binding:"required"`
+	Owner    string `json:"owner" binding:"required,alphanum"`
 	Currency string `json:"currency" binding:"required,oneof=USD EUR IDR GBP"`
 }
 
@@ -41,9 +41,7 @@ func (s *server) createAccount(c *gin.Context) {
 				return
 			}
 		}
-
-		r := errorhandle(err)
-		c.JSON(http.StatusInternalServerError, r)
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
 		return
 	}
 	
