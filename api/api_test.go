@@ -112,7 +112,6 @@ func TestGetByID(t *testing.T) {
 
 func TestCreateAccount(t *testing.T) {
 	account := randomacc()
-	//user, _ := randomUser(t)
 	//anoynymous function & struct
 	testCases := []struct {
 		name          string
@@ -218,6 +217,7 @@ func TestCreateAccount(t *testing.T) {
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Any()).
+					// make sure to set the times to zero.
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -234,6 +234,7 @@ func TestCreateAccount(t *testing.T) {
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
 					CreateAccount(gomock.Any(), gomock.Any()).
+					// make sure to set the times to zero.
 					Times(0)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -264,6 +265,11 @@ func TestCreateAccount(t *testing.T) {
 	}
 }
 
+// func TestListAccount(t *testing.T) {
+
+// }
+
+
 func randomacc() db.Account {
 	return db.Account{
 		ID:       util.Randomint(1, 1000),
@@ -281,23 +287,6 @@ func BodyTest(t *testing.T, body *bytes.Buffer, account db.Account) {
 	err = json.Unmarshal(data, &Account)
 	require.NoError(t, err)
 	require.Equal(t, account, Account)
-}
-
-func Randomuser() (db.User, db.Account) {
-	x := db.User{
-		Username:       util.Randomowner(),
-		HashedPassword: util.Randomstring(6),
-		FullName:       util.Randomowner(),
-		Email:          util.Randomemail(),
-	}
-	y := db.Account{
-		ID:       util.Randomint(1, 100),
-		Owner:    x.Username,
-		Balance:  util.Randomint(1, 1000),
-		Currency: util.Randomcurrency(),
-	}
-
-	return x, y
 }
 
 func requireBodyMatchAccount(t *testing.T, body *bytes.Buffer, account db.Account) {

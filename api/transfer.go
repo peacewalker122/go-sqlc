@@ -22,7 +22,7 @@ func (s *server) Transfertx(c *gin.Context) {
 		return
 	}
 
-	if !s.transferValidator(c, res.FromAccountID,res.ToAccountID, res.Currency) {
+	if !s.transferValidator(c, res.FromAccountID, res.ToAccountID, res.Currency) {
 		return
 	}
 

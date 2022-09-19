@@ -15,10 +15,10 @@ func errorvalidator(err error) gin.H {
 		errmsg := fmt.Sprintf("error happen in %s, due %s, expected %s", e.Field(), e.Value(), e.Param())
 		ermsg = append(ermsg, errmsg)
 	}
-		r := gin.H{
-			"errors": ermsg,
-		}
-	
+	r := gin.H{
+		"errors": ermsg,
+	}
+
 	return r
 }
 
@@ -34,7 +34,7 @@ func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64,
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusBadRequest, errorhandle(err))
+			c.JSON(http.StatusNotFound, errorhandle(err))
 			return false
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
@@ -44,7 +44,7 @@ func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64,
 	account2, err := s.store.GetAccount(c, TAccountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			c.JSON(http.StatusBadRequest, errorhandle(err))
+			c.JSON(http.StatusNotFound, errorhandle(err))
 			return false
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
@@ -58,3 +58,10 @@ func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64,
 	}
 	return true
 }
+
+// func returns(s string) gin.H {
+// 	r := fmt.Errorf("errors in: ", s)
+// 	return gin.H{
+// 		"error": r,
+// 	}
+// }
