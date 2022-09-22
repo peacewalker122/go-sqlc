@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	db "sqlc/db/sqlc"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -29,34 +30,34 @@ func errorhandle(err error) gin.H {
 	return r
 }
 
-func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64, currency string) bool {
+func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64, currency string) (db.Account, bool) {
 	account, err := s.store.GetAccount(c, FaccountID)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, errorhandle(err))
-			return false
+			return account,false
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
-		return false
+		return account,false
 	}
 
 	account2, err := s.store.GetAccount(c, TAccountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, errorhandle(err))
-			return false
+			return account2,false
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
-		return false
+		return account2,false
 	}
 
 	if account.Currency != account2.Currency {
 		err := fmt.Errorf("Different Currency, expected %v. can't process %v into %v", account.Currency, account.Currency, account2.Currency)
 		c.JSON(http.StatusBadRequest, errorhandle(err))
-		return false
+		return account,false
 	}
-	return true
+	return account,true
 }
 
 // func returns(s string) gin.H {

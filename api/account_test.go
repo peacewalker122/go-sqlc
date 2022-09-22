@@ -10,8 +10,10 @@ import (
 	"net/http/httptest"
 	mockdb "sqlc/db/mock"
 	db "sqlc/db/sqlc"
+	"sqlc/token"
 	"sqlc/util"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -20,25 +22,25 @@ import (
 )
 
 func TestGetByID(t *testing.T) {
-
-	account := randomacc()
+	user, _ := randomUser(t)
+	account := randomacc(user.Username)
 
 	//anoynymous function & struct
 	testCases := []struct {
 		name          string
 		ID            int64
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildstubs    func(mock *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name: "OK",
-			ID:   account.ID,
+			ID: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				Addauthorization(t,request,tokenMaker,authTypeBearer,user.Username,time.Minute)
+			},
 			buildstubs: func(mock *mockdb.MockStore) {
-				//stubs
-				mock.EXPECT().
-					GetAccount(gomock.Any(), account.ID).
-					Times(1).
-					Return(account, nil)
+				mock.EXPECT().GetAccount(gomock.Any(), account.ID).Times(1).Return(account, nil)
 			},
 			checkResponse: func(r *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -47,13 +49,12 @@ func TestGetByID(t *testing.T) {
 		},
 		{
 			name: "Not Found",
-			ID:   account.ID,
+			ID: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				Addauthorization(t,request,tokenMaker,authTypeBearer,user.Username,time.Minute)
+			},
 			buildstubs: func(mock *mockdb.MockStore) {
-				//stubs
-				mock.EXPECT().
-					GetAccount(gomock.Any(), account.ID).
-					Times(1).
-					Return(db.Account{}, sql.ErrNoRows)
+				mock.EXPECT().GetAccount(gomock.Any(), account.ID).Times(1).Return(db.Account{}, sql.ErrNoRows)
 			},
 			checkResponse: func(r *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
@@ -61,13 +62,12 @@ func TestGetByID(t *testing.T) {
 		},
 		{
 			name: "InternalError",
-			ID:   account.ID,
+			ID: account.ID,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				Addauthorization(t,request,tokenMaker,authTypeBearer,user.Username,time.Minute)
+			},
 			buildstubs: func(mock *mockdb.MockStore) {
-				//stubs
-				mock.EXPECT().
-					GetAccount(gomock.Any(), account.ID).
-					Times(1).
-					Return(db.Account{}, sql.ErrConnDone)
+				mock.EXPECT().GetAccount(gomock.Any(), account.ID).Times(1).Return(db.Account{}, sql.ErrConnDone)
 			},
 			checkResponse: func(r *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -75,12 +75,12 @@ func TestGetByID(t *testing.T) {
 		},
 		{
 			name: "InvalidID",
-			ID:   0,
+			ID: 0,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				Addauthorization(t,request,tokenMaker,authTypeBearer,user.Username,time.Minute)
+			},
 			buildstubs: func(mock *mockdb.MockStore) {
-				//stubs
-				mock.EXPECT().
-					GetAccount(gomock.Any(), gomock.Any()).
-					Times(0)
+				mock.EXPECT().GetAccount(gomock.Any(), gomock.Any()).Times(0)
 			},
 			checkResponse: func(r *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusBadRequest, recorder.Code)
@@ -96,13 +96,14 @@ func TestGetByID(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildstubs(store)
 
-			server := NewTestServer(t,store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts/%v", tc.ID)
 
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			require.NoError(t, err)
 
+			tc.setupAuth(t,req,server.TokenMaker)
 			server.router.ServeHTTP(recorder, req)
 			tc.checkResponse(t, recorder)
 		})
@@ -111,7 +112,8 @@ func TestGetByID(t *testing.T) {
 }
 
 func TestCreateAccount(t *testing.T) {
-	account := randomacc()
+	user, _ := randomUser(t)
+	account := randomacc(user.Username)
 	//anoynymous function & struct
 	testCases := []struct {
 		name          string
@@ -250,7 +252,7 @@ func TestCreateAccount(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewTestServer(t,store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON
@@ -266,10 +268,12 @@ func TestCreateAccount(t *testing.T) {
 }
 
 func TestListAccount(t *testing.T) {
+	user, _ := randomUser(t)
+
 	n := 5
 	acc := make([]db.Account, n)
 	for i := 0; i < n; i++ {
-		acc[i] = randomacc()
+		acc[i] = randomacc(user.Username)
 	}
 
 	type Query struct {
@@ -362,7 +366,7 @@ func TestListAccount(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewTestServer(t,store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
 
 			url := "/accounts"
@@ -381,12 +385,10 @@ func TestListAccount(t *testing.T) {
 
 }
 
-
-
-func randomacc() db.Account {
+func randomacc(random string) db.Account {
 	return db.Account{
 		ID:       util.Randomint(1, 1000),
-		Owner:    util.Randomowner(),
+		Owner:    random,
 		Balance:  util.Randommoney(),
 		Currency: util.Randomcurrency(),
 	}

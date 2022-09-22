@@ -2,9 +2,10 @@ package api
 
 import (
 	"database/sql"
-	"log"
+	"errors"
 	"net/http"
 	db "sqlc/db/sqlc"
+	"sqlc/token"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -24,9 +25,9 @@ func (s *server) createAccount(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, r)
 		return
 	}
-
+	authParam := c.MustGet(authPayload).(*token.Payload)
 	arg := db.CreateAccountParams{
-		Owner:    req.Owner,
+		Owner:    authParam.Username,
 		Balance:  0,
 		Currency: req.Currency,
 	}
@@ -34,17 +35,17 @@ func (s *server) createAccount(c *gin.Context) {
 	account, err := s.store.CreateAccount(c, arg)
 	if err != nil {
 
-		if PqErr,ok := err.(*pq.Error); ok{
+		if PqErr, ok := err.(*pq.Error); ok {
 			switch PqErr.Code.Name() {
-			case "foreign_key_violation","unique_violation":
-				c.JSON(http.StatusForbidden,errorhandle(err))
+			case "foreign_key_violation", "unique_violation":
+				c.JSON(http.StatusForbidden, errorhandle(err))
 				return
 			}
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
 		return
 	}
-	
+
 	c.JSON(http.StatusOK, account)
 }
 
@@ -70,6 +71,12 @@ func (s *server) getaccountid(c *gin.Context) {
 		return
 	}
 
+	authParam := c.MustGet(authPayload).(*token.Payload)
+	if getid.Owner != authParam.Username {
+		err := errors.New("Unauthorized Username for this account")
+		c.JSON(http.StatusUnauthorized, errorhandle(err))
+	}
+
 	c.JSON(http.StatusOK, getid)
 }
 
@@ -85,9 +92,9 @@ func (server *server) listAccount(ctx *gin.Context) {
 		return
 	}
 
-	log.Println(req.PageSize, " and ", req.PageID)
-
+	authParam := ctx.MustGet(authPayload).(*token.Payload)
 	arg := db.ListAccountsParams{
+		Owner:  authParam.Username,
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
 	}

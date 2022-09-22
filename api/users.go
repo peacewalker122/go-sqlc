@@ -109,7 +109,7 @@ func (s *server) serverLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := s.AccToken.CreateToken(res.Username, s.config.Duration)
+	token, err := s.TokenMaker.CreateToken(res.Username, s.config.Duration)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
 	}

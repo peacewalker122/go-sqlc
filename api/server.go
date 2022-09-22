@@ -13,7 +13,7 @@ type server struct {
 	config   util.Config
 	router   *gin.Engine
 	store    db.Store
-	AccToken token.Maker
+	TokenMaker token.Maker
 }
 
 func Newserver(c util.Config, store db.Store) (*server, error) {
@@ -24,7 +24,7 @@ func Newserver(c util.Config, store db.Store) (*server, error) {
 	server := &server{
 		config:   c,
 		store:    store,
-		AccToken: Newtoken,
+		TokenMaker: Newtoken,
 	}
 	server.routerhandle()
 	return server, nil
@@ -32,13 +32,17 @@ func Newserver(c util.Config, store db.Store) (*server, error) {
 
 func (server *server) routerhandle() {
 	router := gin.Default()
+	
+	authRouter := router.Group("/").Use(authMiddleware(server.TokenMaker))
 
-	router.POST("/user/login",server.serverLogin)
-	router.POST("/user", server.createUser)
-	router.POST("/accounts", server.createAccount)
-	router.GET("/accounts/:id", server.getaccountid)
-	router.GET("/accounts", server.listAccount)
-	router.POST("/transfers", server.Transfertx)
+	authRouter.POST("/user/login",server.serverLogin)
+	authRouter.POST("/user", server.createUser)
+
+	authRouter.POST("/accounts", server.createAccount)
+	authRouter.GET("/accounts/:id", server.getaccountid)
+	authRouter.GET("/accounts", server.listAccount)
+	
+	authRouter.POST("/transfers", server.Transfertx)
 	server.router = router
 }
 

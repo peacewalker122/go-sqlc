@@ -112,17 +112,13 @@ func TestPaseto(t *testing.T) {
 		require.Nil(t, payload)
 	})
 	t.Run("Invalid Token", func(t *testing.T) {
-		maker, err := NewPasetoMaker(util.Randomstring(32))
-		require.NoError(t, err)
-		require.NotNil(t, maker)
-
-		payload, err := Newpayload(util.Randomowner(), time.Minute)
-		require.NoError(t, err)
-
-		var p *PasetoMaker
-
-		encrypt, err := p.paseto.Encrypt(p.symmectricKey, payload, nil)
+		maker, err := NewPasetoMaker(util.Randomstring(1))
 		require.Error(t, err)
-		require.Empty(t, encrypt)
+		require.EqualError(t,err,Pasetoerr.Error())
+		require.Nil(t, maker)
+
+		//not implemented yet.
+		
+
 	})
 }
