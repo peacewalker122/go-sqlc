@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 	db "sqlc/db/sqlc"
 	"sqlc/util"
@@ -18,11 +19,21 @@ type createUserParam struct {
 }
 
 type userResp struct {
-	Username string `json:"username"`
-	Fullname string `json:"full_name"`
-	Email string `json:"email"`
+	Username       string    `json:"username"`
+	Fullname       string    `json:"full_name"`
+	Email          string    `json:"email"`
 	PasswordChange time.Time `json:"password_change"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt      time.Time `json:"created_at"`
+}
+
+func newUserResp(u db.User) userResp {
+	return userResp{
+		Username:       u.Username,
+		Fullname:       u.FullName,
+		Email:          u.Email,
+		PasswordChange: u.PasswordChangedAt,
+		CreatedAt:      u.CreatedAt,
+	}
 }
 
 func (s *server) createUser(c *gin.Context) {
@@ -60,13 +71,52 @@ func (s *server) createUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, r)
 		return
 	}
-	resp := userResp{
-		Username:       account.Username,
-		Fullname:       account.FullName,
-		Email:          account.Email,
-		PasswordChange: account.PasswordChangedAt,
-		CreatedAt:      account.CreatedAt,
-	}
+	resp := newUserResp(account)
 
 	c.JSON(http.StatusOK, resp)
+}
+
+type loginParam struct {
+	Username string `json:"username" binding:"required,alphanum"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+type loginResp struct {
+	Token string   `json:"acc_token"`
+	User  userResp `json:"user"`
+}
+
+func (s *server) serverLogin(c *gin.Context) {
+	var req loginParam
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorvalidator(err))
+		return
+	}
+
+	res, err := s.store.GetUser(c, req.Username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, errorhandle(err))
+			return
+		}
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
+	}
+
+	err = util.CheckPass(req.Password, res.HashedPassword)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, errorhandle(err))
+		return
+	}
+
+	token, err := s.AccToken.CreateToken(res.Username, s.config.Duration)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
+	}
+
+	rsp := loginResp{
+		Token: token,
+		User:  newUserResp(res),
+	}
+	c.JSON(http.StatusOK, rsp)
 }

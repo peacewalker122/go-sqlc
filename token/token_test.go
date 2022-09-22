@@ -10,112 +10,119 @@ import (
 )
 
 func TestJWT(t *testing.T) {
-	t.Run("OK",func(t *testing.T) {
-	maker, err := NewJWTmaker(util.Randomstring(32))
-	require.NoError(t, err)
-	require.NotEmpty(t, maker)
+	t.Run("OK", func(t *testing.T) {
+		maker, err := NewJWTmaker(util.Randomstring(32))
+		require.NoError(t, err)
+		require.NotEmpty(t, maker)
 
-	username := util.Randomowner()
-	duration := time.Minute
+		username := util.Randomowner()
+		duration := time.Minute
 
-	IssuedAt := time.Now()
-	ExpiredAt := IssuedAt.Add(duration)
+		IssuedAt := time.Now()
+		ExpiredAt := IssuedAt.Add(duration)
 
-	token,err := maker.CreateToken(username,duration)
-	require.NoError(t,err)
-	require.NotEmpty(t,token)
+		token, err := maker.CreateToken(username, duration)
+		require.NoError(t, err)
+		require.NotEmpty(t, token)
 
-	payload,err := maker.VerifyToken(token)
-	require.NoError(t,err)
-	require.NotEmpty(t,payload)
+		payload, err := maker.VerifyToken(token)
+		require.NoError(t, err)
+		require.NotEmpty(t, payload)
 
-	require.NotZero(t,payload.ID)
-	require.Equal(t,username,payload.Username)
-	require.WithinDuration(t,IssuedAt,payload.IssuedAt,time.Second)
-	require.WithinDuration(t,ExpiredAt,payload.ExpiredAt,time.Second)
+		require.NotZero(t, payload.ID)
+		require.Equal(t, username, payload.Username)
+		require.WithinDuration(t, IssuedAt, payload.IssuedAt, time.Second)
+		require.WithinDuration(t, ExpiredAt, payload.ExpiredAt, time.Second)
 	})
-t.Run("ExpiredJWT_Token",func(t *testing.T) {
-	maker, err := NewJWTmaker(util.Randomstring(32))
-	require.NoError(t, err)
-	require.NotEmpty(t, maker)
+	t.Run("ExpiredJWT_Token", func(t *testing.T) {
+		maker, err := NewJWTmaker(util.Randomstring(32))
+		require.NoError(t, err)
+		require.NotEmpty(t, maker)
 
-	token,err := maker.CreateToken(util.Randomowner(),-time.Minute)
-	require.NoError(t,err)
-	require.NotEmpty(t,token)
+		token, err := maker.CreateToken(util.Randomowner(), -time.Minute)
+		require.NoError(t, err)
+		require.NotEmpty(t, token)
 
-	payload,err := maker.VerifyToken(token)
-	require.Error(t,err)
-	require.EqualError(t,err,ErrExpired.Error())
-	require.Nil(t,payload)
-})
-t.Run("InvalidKey",func(t *testing.T) {
-	maker,err := NewJWTmaker(util.Randomstring(31))
-	require.Error(t,err)
-	require.EqualError(t,err,WrongKey.Error())
-	require.Nil(t,maker)
-})
-t.Run("InvalidJWT_TokenAlgNone",func(t *testing.T) {
-	payload,err := Newpayload(util.Randomowner(),time.Minute)
-	require.NoError(t,err)
+		payload, err := maker.VerifyToken(token)
+		require.Error(t, err)
+		require.EqualError(t, err, ErrExpired.Error())
+		require.Nil(t, payload)
+	})
+	t.Run("InvalidKey", func(t *testing.T) {
+		maker, err := NewJWTmaker(util.Randomstring(31))
+		require.Error(t, err)
+		require.EqualError(t, err, WrongKey.Error())
+		require.Nil(t, maker)
+	})
+	t.Run("InvalidJWT_TokenAlgNone", func(t *testing.T) {
+		payload, err := Newpayload(util.Randomowner(), time.Minute)
+		require.NoError(t, err)
 
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone,payload)
-	token,err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
-	require.NoError(t,err)
+		jwtToken := jwt.NewWithClaims(jwt.SigningMethodNone, payload)
+		token, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
+		require.NoError(t, err)
 
-	maker,err := NewJWTmaker(util.Randomstring(32))
-	require.NoError(t,err)
+		maker, err := NewJWTmaker(util.Randomstring(32))
+		require.NoError(t, err)
 
-	payload,err = maker.VerifyToken(token)
-	require.Error(t,err)
-	require.EqualError(t,err,ErrToken.Error())
-	require.Nil(t,payload)
-})
+		payload, err = maker.VerifyToken(token)
+		require.Error(t, err)
+		require.EqualError(t, err, ErrToken.Error())
+		require.Nil(t, payload)
+	})
 }
 
-func TestPaseto(t *testing.T){
+func TestPaseto(t *testing.T) {
 	t.Run("OK", func(t *testing.T) {
-	maker, err := NewPasetoMaker(util.Randomstring(32))
-	require.NoError(t, err)
-	require.NotEmpty(t, maker)
+		maker, err := NewPasetoMaker(util.Randomstring(32))
+		require.NoError(t, err)
+		require.NotEmpty(t, maker)
 
-	username := util.Randomowner()
-	duration := time.Minute
+		username := util.Randomowner()
+		duration := time.Minute
 
-	IssuedAt := time.Now()
-	ExpiredAt := IssuedAt.Add(duration)
+		IssuedAt := time.Now()
+		ExpiredAt := IssuedAt.Add(duration)
 
-	token,err := maker.CreateToken(username,duration)
-	require.NoError(t,err)
-	require.NotEmpty(t,token)
+		token, err := maker.CreateToken(username, duration)
+		require.NoError(t, err)
+		require.NotEmpty(t, token)
 
-	payload,err := maker.VerifyToken(token)
-	require.NoError(t,err)
-	require.NotEmpty(t,payload)
+		payload, err := maker.VerifyToken(token)
+		require.NoError(t, err)
+		require.NotEmpty(t, payload)
 
-	require.NotZero(t,payload.ID)
-	require.Equal(t,username,payload.Username)
-	require.WithinDuration(t,IssuedAt,payload.IssuedAt,time.Second)
-	require.WithinDuration(t,ExpiredAt,payload.ExpiredAt,time.Second)
+		require.NotZero(t, payload.ID)
+		require.Equal(t, username, payload.Username)
+		require.WithinDuration(t, IssuedAt, payload.IssuedAt, time.Second)
+		require.WithinDuration(t, ExpiredAt, payload.ExpiredAt, time.Second)
 	})
-t.Run("ExpiredToken",func(t *testing.T) {
-	maker, err := NewJWTmaker(util.Randomstring(32))
-	require.NoError(t, err)
-	require.NotEmpty(t, maker)
+	t.Run("ExpiredToken", func(t *testing.T) {
+		maker, err := NewJWTmaker(util.Randomstring(32))
+		require.NoError(t, err)
+		require.NotEmpty(t, maker)
 
-	token,err := maker.CreateToken(util.Randomowner(),-time.Minute)
-	require.NoError(t,err)
-	require.NotEmpty(t,token)
+		token, err := maker.CreateToken(util.Randomowner(), -time.Minute)
+		require.NoError(t, err)
+		require.NotEmpty(t, token)
 
-	payload,err := maker.VerifyToken(token)
-	require.Error(t,err)
-	require.EqualError(t,err,ErrExpired.Error())
-	require.Nil(t,payload)
+		payload, err := maker.VerifyToken(token)
+		require.Error(t, err)
+		require.EqualError(t, err, ErrExpired.Error())
+		require.Nil(t, payload)
 	})
-t.Run("InvalidToken",func(t *testing.T) {
-	maker,err := NewPasetoMaker(util.Randomstring(32))
-	require.NoError(t,err)
-	require.NotEmpty(t,maker)
+	t.Run("Invalid Token", func(t *testing.T) {
+		maker, err := NewPasetoMaker(util.Randomstring(32))
+		require.NoError(t, err)
+		require.NotNil(t, maker)
 
-	
-})
+		payload, err := Newpayload(util.Randomowner(), time.Minute)
+		require.NoError(t, err)
+
+		var p *PasetoMaker
+
+		encrypt, err := p.paseto.Encrypt(p.symmectricKey, payload, nil)
+		require.Error(t, err)
+		require.Empty(t, encrypt)
+	})
 }

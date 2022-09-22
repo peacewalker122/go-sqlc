@@ -96,7 +96,7 @@ func TestGetByID(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildstubs(store)
 
-			server := Newserver(store)
+			server := NewTestServer(t,store)
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts/%v", tc.ID)
 
@@ -250,7 +250,7 @@ func TestCreateAccount(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := Newserver(store)
+			server := NewTestServer(t,store)
 			recorder := httptest.NewRecorder()
 
 			// Marshal body data to JSON
@@ -362,7 +362,7 @@ func TestListAccount(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := Newserver(store)
+			server := NewTestServer(t,store)
 			recorder := httptest.NewRecorder()
 
 			url := "/accounts"

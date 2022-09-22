@@ -183,7 +183,7 @@ func TestCreateTransfer(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			tc.buildStubs(store)
 
-			server := Newserver(store)
+			server := NewTestServer(t,store)
 
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)

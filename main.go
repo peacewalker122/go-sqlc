@@ -7,6 +7,7 @@ import (
 	db "sqlc/db/sqlc"
 
 	"sqlc/util"
+
 	_ "github.com/golang/mock/mockgen/model"
 	_ "github.com/lib/pq"
 )
@@ -20,8 +21,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	store := db.Newstore(conn)
-	server := api.Newserver(store)
+	server, err := api.Newserver(config, store)
+	if err != nil {
+		log.Fatal("can't establish server due ", err.Error())
+	}
 
 	err = server.Runserver(config.ServerAddress)
 	if err != nil {

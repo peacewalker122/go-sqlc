@@ -1,7 +1,6 @@
 package token
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/aead/chacha20poly1305"
@@ -15,7 +14,7 @@ type PasetoMaker struct {
 
 func NewPasetoMaker(symmectricKey string) (Maker, error) {
 	if len(symmectricKey) != chacha20poly1305.KeySize {
-		return nil, fmt.Errorf("invalid key size, must be equal to %v characters", chacha20poly1305.KeySize)
+		return nil, Pasetoerr
 	}
 	maker := &PasetoMaker{
 		paseto:        &paseto.V2{},
