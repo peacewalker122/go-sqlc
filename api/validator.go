@@ -30,34 +30,34 @@ func errorhandle(err error) gin.H {
 	return r
 }
 
-func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64, currency string) (db.Account, bool) {
+func (s *server) transferValidator(c *gin.Context, FaccountID, TAccountID int64, currency string) (db.Account,db.Account, bool) {
 	account, err := s.store.GetAccount(c, FaccountID)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, errorhandle(err))
-			return account,false
+			return account,db.Account{},false
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
-		return account,false
+		return account,db.Account{},false
 	}
 
 	account2, err := s.store.GetAccount(c, TAccountID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			c.JSON(http.StatusNotFound, errorhandle(err))
-			return account2,false
+			return db.Account{},account2,false
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
-		return account2,false
+		return db.Account{},account2,false
 	}
 
 	if account.Currency != account2.Currency {
 		err := fmt.Errorf("Different Currency, expected %v. can't process %v into %v", account.Currency, account.Currency, account2.Currency)
 		c.JSON(http.StatusBadRequest, errorhandle(err))
-		return account,false
+		return account,account2,false
 	}
-	return account,true
+	return account,account2,true
 }
 
 // func returns(s string) gin.H {

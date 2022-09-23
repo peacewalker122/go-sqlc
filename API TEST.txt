@@ -1,0 +1,10 @@
+=== API TEST PROCEDURE ===
+
+- create a control as a varaible of gomock.controller.
+- defer the control.
+- implement the store to call the needed query function with control as a param with return as mockstore.
+- create a server to make a dummy test.
+- create recorde that have a variable as httptest recorder.
+-- optional create string var that take the url.
+- implement the request with http new request make sure to have a same method like in the server.
+- serve the request with the recorder as a responseWriter.

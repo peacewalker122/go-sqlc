@@ -23,13 +23,15 @@ func (s *server) Transfertx(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorvalidator(err))
 		return
 	}
-	Param,ok := s.transferValidator(c, res.FromAccountID, res.ToAccountID, res.Currency)
+	
+	Param,_,ok := s.transferValidator(c, res.FromAccountID, res.ToAccountID, res.Currency)
 	if !ok {
 		return
 	}
 
 	authPayload := c.MustGet(authPayload).(*token.Payload)
 	if authPayload.Username != Param.Owner {
+		err := fmt.Errorf("Unauthorized username for this owner")
 		c.JSON(http.StatusUnauthorized,errorhandle(err))
 		return
 	}
@@ -42,8 +44,7 @@ func (s *server) Transfertx(c *gin.Context) {
 
 	getid, err := s.store.TransferCtx(c, arg)
 	if err != nil {
-		err := fmt.Errorf("Unauthorized username for this owner")
-		c.JSON(http.StatusInternalServerError, errorvalidator(err))
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
 	}
 
 	c.JSON(http.StatusOK, getid)

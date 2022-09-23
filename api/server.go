@@ -33,10 +33,10 @@ func Newserver(c util.Config, store db.Store) (*server, error) {
 func (server *server) routerhandle() {
 	router := gin.Default()
 	
+	router.POST("/user/login",server.serverLogin)
+	router.POST("/user", server.createUser)
+	
 	authRouter := router.Group("/").Use(authMiddleware(server.TokenMaker))
-
-	authRouter.POST("/user/login",server.serverLogin)
-	authRouter.POST("/user", server.createUser)
 
 	authRouter.POST("/accounts", server.createAccount)
 	authRouter.GET("/accounts/:id", server.getaccountid)

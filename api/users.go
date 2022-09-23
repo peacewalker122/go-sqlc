@@ -101,6 +101,7 @@ func (s *server) serverLogin(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
+		return
 	}
 
 	err = util.CheckPass(req.Password, res.HashedPassword)
