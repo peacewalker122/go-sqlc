@@ -82,8 +82,8 @@ type loginParam struct {
 }
 
 type loginResp struct {
-	Token string   `json:"acc_token"`
 	User  userResp `json:"user"`
+	Token string   `json:"acc_token"`
 }
 
 func (s *server) serverLogin(c *gin.Context) {
