@@ -3,6 +3,7 @@ package token
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aead/chacha20poly1305"
@@ -28,13 +29,14 @@ func Newpayload(username string, duration time.Duration) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
-	payload := Payload{
+	log.Println(duration)
+	payload := &Payload{
 		ID:        token,
 		Username:  username,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),
 	}
-	return &payload, nil
+	return payload, nil
 }
 
 func (payload *Payload) Valid() error {

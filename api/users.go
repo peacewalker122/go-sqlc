@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -82,8 +83,12 @@ type loginParam struct {
 }
 
 type loginResp struct {
-	User  userResp `json:"user"`
-	Token string   `json:"acc_token"`
+	SessionID             uuid.UUID `json:"session_id"`
+	RefreshToken          string    `json:"refresh_token"`
+	RefreshTokenExpiresAt time.Time `json:"refresh_token_expires_at"`
+	User                  userResp  `json:"user"`
+	AccesToken            string    `json:"acc_token"`
+	AccesTokenExpiresAt   time.Time `json:"acces_token_expire_sat"`
 }
 
 func (s *server) serverLogin(c *gin.Context) {
@@ -110,14 +115,36 @@ func (s *server) serverLogin(c *gin.Context) {
 		return
 	}
 
-	token, err := s.TokenMaker.CreateToken(res.Username, s.config.Duration)
+	token, AccessPayload, err := s.TokenMaker.CreateToken(res.Username, s.config.Duration)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
+	}
+
+	RefreshToken, RefreshPayload, err := s.TokenMaker.CreateToken(res.Username, s.config.RefreshToken)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorhandle(err))
+	}
+
+	session, err := s.store.CreateSession(c, db.CreateSessionParams{
+		ID:           RefreshPayload.ID,
+		Username:     res.Username,
+		RefreshToken: RefreshToken,
+		UserAgent:    c.Request.UserAgent(),
+		ClientIp:     c.ClientIP(),
+		IsBlocked:    false,
+		ExpiresAt:    RefreshPayload.ExpiredAt,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, errorhandle(err))
 	}
 
 	rsp := loginResp{
-		Token: token,
-		User:  newUserResp(res),
+		SessionID:             session.ID,
+		RefreshToken:          RefreshToken,
+		RefreshTokenExpiresAt: RefreshPayload.ExpiredAt,
+		User:                  newUserResp(res),
+		AccesToken:            token,
+		AccesTokenExpiresAt:   AccessPayload.ExpiredAt,
 	}
 	c.JSON(http.StatusOK, rsp)
 }

@@ -17,7 +17,7 @@ type server struct {
 }
 
 func Newserver(c util.Config, store db.Store) (*server, error) {
-	Newtoken, err := token.NewJWTmaker(c.SymmectricKey)
+	Newtoken, err := token.NewPasetoMaker(c.SymmectricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token %v", err.Error())
 	}
@@ -35,6 +35,7 @@ func (server *server) routerhandle() {
 	
 	router.POST("/user/login",server.serverLogin)
 	router.POST("/user", server.createUser)
+	router.POST("token/renew",server.serverAccesToken)
 	
 	authRouter := router.Group("/").Use(authMiddleware(server.TokenMaker))
 
