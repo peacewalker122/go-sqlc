@@ -17,6 +17,8 @@ type SQLStore struct {
 
 func Newstore(db *sql.DB) Store {
 	return &SQLStore{
+		//queries below take the "implementation of the dbtc interface" to exec the Store interface.
+		// so make sure the implementation the function below is same like our interface above.
 		Queries: New(db),
 		db:      db,
 	}

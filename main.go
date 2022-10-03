@@ -28,7 +28,7 @@ func main() {
 	}
 
 	store := db.Newstore(conn)
-	GinServer(config,store)
+	gRPCServer(config,store)
 }
 
 func gRPCServer(config util.Config, store db.Store){
