@@ -20,7 +20,7 @@ import (
 func main() {
 	config, err := util.LoadConfig(".")
 	if err != nil {
-		log.Fatal("can't definef config ", err.Error())
+		log.Fatal("can't define config: ", err.Error())
 	}
 	conn, err := sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
