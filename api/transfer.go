@@ -3,8 +3,9 @@ package api
 import (
 	"fmt"
 	"net/http"
-	db "sqlc/db/sqlc"
-	"sqlc/token"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/token"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,16 +24,16 @@ func (s *server) Transfertx(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorvalidator(err))
 		return
 	}
-	
-	Param,_,ok := s.transferValidator(c, res.FromAccountID, res.ToAccountID, res.Currency)
+
+	Param, _, ok := s.transferValidator(c, res.FromAccountID, res.ToAccountID, res.Currency)
 	if !ok {
 		return
 	}
 
 	authPayload := c.MustGet(authPayload).(*token.Payload)
 	if authPayload.Username != Param.Owner {
-		err := fmt.Errorf("Unauthorized username for this owner")
-		c.JSON(http.StatusUnauthorized,errorhandle(err))
+		err := fmt.Errorf("unauthorized username for this owner")
+		c.JSON(http.StatusUnauthorized, errorhandle(err))
 		return
 	}
 

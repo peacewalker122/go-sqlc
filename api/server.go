@@ -2,17 +2,18 @@ package api
 
 import (
 	"fmt"
-	db "sqlc/db/sqlc"
-	"sqlc/token"
-	"sqlc/util"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/token"
+	"github.com/peacewalker122/go-sqlc/util"
 
 	"github.com/gin-gonic/gin"
 )
 
 type server struct {
-	config   util.Config
-	router   *gin.Engine
-	store    db.Store
+	config     util.Config
+	router     *gin.Engine
+	store      db.Store
 	TokenMaker token.Maker
 }
 
@@ -22,8 +23,8 @@ func Newserver(c util.Config, store db.Store) (*server, error) {
 		return nil, fmt.Errorf("cannot create token %v", err.Error())
 	}
 	server := &server{
-		config:   c,
-		store:    store,
+		config:     c,
+		store:      store,
 		TokenMaker: Newtoken,
 	}
 	server.routerhandle()
@@ -32,17 +33,17 @@ func Newserver(c util.Config, store db.Store) (*server, error) {
 
 func (server *server) routerhandle() {
 	router := gin.Default()
-	
-	router.POST("/user/login",server.serverLogin)
+
+	router.POST("/user/login", server.serverLogin)
 	router.POST("/user", server.createUser)
-	router.POST("token/renew",server.serverAccesToken)
-	
+	router.POST("token/renew", server.serverAccesToken)
+
 	authRouter := router.Group("/").Use(authMiddleware(server.TokenMaker))
 
 	authRouter.POST("/accounts", server.createAccount)
 	authRouter.GET("/accounts/:id", server.getaccountid)
 	authRouter.GET("/accounts", server.listAccount)
-	
+
 	authRouter.POST("/transfers", server.Transfertx)
 	server.router = router
 }

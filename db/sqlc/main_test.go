@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"os"
-	"sqlc/util"
 	"testing"
+
+	"github.com/peacewalker122/go-sqlc/util"
 
 	_ "github.com/lib/pq"
 )

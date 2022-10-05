@@ -3,9 +3,10 @@ package gapi
 import (
 	"context"
 	"database/sql"
-	db "sqlc/db/sqlc"
-	"sqlc/pb"
-	"sqlc/util"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/pb"
+	"github.com/peacewalker122/go-sqlc/util"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,7 +19,7 @@ func (s *server) Login(c context.Context, req *pb.LoginRequest) (*pb.LoginRespon
 		if err == sql.ErrNoRows {
 			return nil, status.Errorf(codes.NotFound, "No Such Username")
 		}
-		return nil, status.Errorf(codes.Internal, "Can't Get The User Due: ", err)
+		return nil, status.Errorf(codes.Internal, "Can't Get The User Due: %v", err)
 	}
 
 	err = util.CheckPass(req.Password, res.HashedPassword)

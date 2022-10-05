@@ -7,7 +7,7 @@ package mockdb
 import (
 	context "context"
 	reflect "reflect"
-	db "sqlc/db/sqlc"
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"

@@ -3,7 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
-	"sqlc/util"
+	"github.com/peacewalker122/go-sqlc/util"
 	"testing"
 
 	"github.com/stretchr/testify/require"

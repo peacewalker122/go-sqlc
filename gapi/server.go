@@ -2,10 +2,11 @@ package gapi
 
 import (
 	"fmt"
-	db "sqlc/db/sqlc"
-	"sqlc/token"
-	"sqlc/util"
-	"sqlc/pb"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/pb"
+	"github.com/peacewalker122/go-sqlc/token"
+	"github.com/peacewalker122/go-sqlc/util"
 )
 
 type server struct {

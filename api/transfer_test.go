@@ -6,11 +6,13 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	mockdb "sqlc/db/mock"
-	db "sqlc/db/sqlc"
-	"sqlc/token"
 	"testing"
 	"time"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/token"
+
+	mockdb "github.com/peacewalker122/go-sqlc/db/mock"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -103,8 +105,8 @@ func TestCreateTransfer(t *testing.T) {
 				Addauthorization(t, request, tokenMaker, authTypeBearer, "piggo", time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().GetAccount(gomock.Any(), account1.ID).Times(1).Return(account1,nil)
-				store.EXPECT().GetAccount(gomock.Any(), account2.ID).Times(1).Return(account2,nil)
+				store.EXPECT().GetAccount(gomock.Any(), account1.ID).Times(1).Return(account1, nil)
+				store.EXPECT().GetAccount(gomock.Any(), account2.ID).Times(1).Return(account2, nil)
 
 				// arg := db.TransferctxParams{
 				// 	FromAccountID: account1.ID,
@@ -127,7 +129,7 @@ func TestCreateTransfer(t *testing.T) {
 				"currency": "USD",
 			},
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
-				Addauthorization(t, request, tokenMaker, authTypeBearer,user1.Username,-time.Minute)
+				Addauthorization(t, request, tokenMaker, authTypeBearer, user1.Username, -time.Minute)
 			},
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().GetAccount(gomock.Any(), gomock.Eq(account1.ID)).Times(0)

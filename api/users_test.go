@@ -5,14 +5,17 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	mockdb "sqlc/db/mock"
-	db "sqlc/db/sqlc"
-	"sqlc/util"
 	"testing"
+
+	"github.com/peacewalker122/go-sqlc/util"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+
+	mockdb "github.com/peacewalker122/go-sqlc/db/mock"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -203,7 +206,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestLoginUser(t *testing.T) {
 	user, password := randomUser(t)
-	testCases := []struct{
+	testCases := []struct {
 		name          string
 		Body          gin.H
 		buildstubs    func(mock *mockdb.MockStore)
@@ -212,8 +215,8 @@ func TestLoginUser(t *testing.T) {
 		{
 			name: "Ok",
 			Body: gin.H{
-				"username":  user.Username,
-				"password":  password,
+				"username": user.Username,
+				"password": password,
 			},
 			buildstubs: func(mock *mockdb.MockStore) {
 				//stubs
@@ -222,7 +225,7 @@ func TestLoginUser(t *testing.T) {
 					Times(1).
 					Return(user, nil)
 				mock.EXPECT().
-					CreateSession(gomock.Any(),gomock.Any()).
+					CreateSession(gomock.Any(), gomock.Any()).
 					Times(1)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -232,8 +235,8 @@ func TestLoginUser(t *testing.T) {
 		{
 			name: "UserNotFound",
 			Body: gin.H{
-				"username":  "userUsername",
-				"password":  password,
+				"username": "userUsername",
+				"password": password,
 			},
 			buildstubs: func(mock *mockdb.MockStore) {
 				//stubs
@@ -249,8 +252,8 @@ func TestLoginUser(t *testing.T) {
 		{
 			name: "InternalError",
 			Body: gin.H{
-				"username":  user.Username,
-				"password":  password,
+				"username": user.Username,
+				"password": password,
 			},
 			buildstubs: func(mock *mockdb.MockStore) {
 				//stubs
@@ -266,8 +269,8 @@ func TestLoginUser(t *testing.T) {
 		{
 			name: "InternalError",
 			Body: gin.H{
-				"username":  user.Username,
-				"password":  password,
+				"username": user.Username,
+				"password": password,
 			},
 			buildstubs: func(mock *mockdb.MockStore) {
 				//stubs
@@ -283,15 +286,15 @@ func TestLoginUser(t *testing.T) {
 		{
 			name: "WrongPassword",
 			Body: gin.H{
-				"username":  user.Username,
-				"password":  "password",
+				"username": user.Username,
+				"password": "password",
 			},
 			buildstubs: func(mock *mockdb.MockStore) {
 				//stubs
 				mock.EXPECT().
 					GetUser(gomock.Any(), gomock.Eq(user.Username)).
 					Times(1).
-					Return(user,nil)
+					Return(user, nil)
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -300,8 +303,8 @@ func TestLoginUser(t *testing.T) {
 		{
 			name: "InvalidUsername",
 			Body: gin.H{
-				"username":  "user.Username",
-				"password":  password,
+				"username": "user.Username",
+				"password": password,
 			},
 			buildstubs: func(mock *mockdb.MockStore) {
 				//stubs
@@ -314,26 +317,26 @@ func TestLoginUser(t *testing.T) {
 			},
 		},
 	}
-	for i := range testCases{
+	for i := range testCases {
 		tc := testCases[i]
-		t.Run(tc.name,func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildstubs(store)
 
-			server := NewTestServer(t,store)
+			server := NewTestServer(t, store)
 			recorder := httptest.NewRecorder()
-			
-			data,err := json.Marshal(tc.Body)
-			require.NoError(t,err)
+
+			data, err := json.Marshal(tc.Body)
+			require.NoError(t, err)
 
 			url := "/user/login"
-			request,err := http.NewRequest(http.MethodPost,url,bytes.NewReader(data))
-			require.NoError(t,err)
+			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			require.NoError(t, err)
 
-			server.router.ServeHTTP(recorder,request)
+			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(recorder)
 		})
 	}
@@ -354,7 +357,7 @@ func randomUser(t *testing.T) (user db.User, password string) {
 }
 
 func Bodycheck(t *testing.T, body *bytes.Buffer, account db.User) {
-	data, err := ioutil.ReadAll(body)
+	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 
 	var gotUser db.User

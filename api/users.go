@@ -3,9 +3,10 @@ package api
 import (
 	"database/sql"
 	"net/http"
-	db "sqlc/db/sqlc"
-	"sqlc/util"
 	"time"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

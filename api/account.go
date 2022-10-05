@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	db "sqlc/db/sqlc"
-	"sqlc/token"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/token"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -73,7 +74,7 @@ func (s *server) getaccountid(c *gin.Context) {
 
 	authParam := c.MustGet(authPayload).(*token.Payload)
 	if getid.Owner != authParam.Username {
-		err := errors.New("Unauthorized Username for this account")
+		err := errors.New("unauthorized Username for this account")
 		c.JSON(http.StatusUnauthorized, errorhandle(err))
 	}
 

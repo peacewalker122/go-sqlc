@@ -1,7 +1,7 @@
 package token
 
 import (
-	"sqlc/util"
+	"github.com/peacewalker122/go-sqlc/util"
 	"testing"
 	"time"
 

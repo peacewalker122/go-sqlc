@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"sqlc/token"
 	"testing"
 	"time"
+
+	"github.com/peacewalker122/go-sqlc/token"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -20,14 +21,14 @@ func Addauthorization(
 	authType string,
 	username string,
 	duration time.Duration,
-){
-	token,payload,err := tokenMaker.CreateToken(username,duration)
-	require.NoError(t,err)
-	require.NotEmpty(t,payload)
+) {
+	token, payload, err := tokenMaker.CreateToken(username, duration)
+	require.NoError(t, err)
+	require.NotEmpty(t, payload)
 
-	AuthHeader := fmt.Sprintf("%s %s", authType,token)
-	assert.NoError(t,err)
-	req.Header.Set(authHeaderkey,AuthHeader)
+	AuthHeader := fmt.Sprintf("%s %s", authType, token)
+	assert.NoError(t, err)
+	req.Header.Set(authHeaderkey, AuthHeader)
 }
 
 func TestAuth(t *testing.T) {
@@ -40,19 +41,19 @@ func TestAuth(t *testing.T) {
 		{
 			name: "OK",
 			setupAuth: func(t *testing.T, request *http.Request, token token.Maker) {
-				Addauthorization(t,request,token,authTypeBearer,"test",time.Minute)
+				Addauthorization(t, request, token, authTypeBearer, "test", time.Minute)
 			},
 			responseRecorder: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				assert.Equal(t,http.StatusOK,recorder.Code)
+				assert.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
 			name: "UnsupportedAuth",
 			setupAuth: func(t *testing.T, request *http.Request, token token.Maker) {
-				Addauthorization(t,request,token,"awsLock","test",time.Minute)
+				Addauthorization(t, request, token, "awsLock", "test", time.Minute)
 			},
 			responseRecorder: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				assert.Equal(t,http.StatusUnauthorized,recorder.Code)
+				assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
@@ -61,25 +62,25 @@ func TestAuth(t *testing.T) {
 				//Addauthorization(t,request,token,"awsLock","test",time.Minute)
 			},
 			responseRecorder: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				assert.Equal(t,http.StatusUnauthorized,recorder.Code)
+				assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
 			name: "InvalidAuthentication",
 			setupAuth: func(t *testing.T, request *http.Request, token token.Maker) {
-				Addauthorization(t,request,token,"","test",time.Minute)
+				Addauthorization(t, request, token, "", "test", time.Minute)
 			},
 			responseRecorder: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				assert.Equal(t,http.StatusUnauthorized,recorder.Code)
+				assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
 			name: "ExpiredToken",
 			setupAuth: func(t *testing.T, request *http.Request, token token.Maker) {
-				Addauthorization(t,request,token,authTypeBearer,"test",-time.Minute)
+				Addauthorization(t, request, token, authTypeBearer, "test", -time.Minute)
 			},
 			responseRecorder: func(t *testing.T, recorder *httptest.ResponseRecorder) {
-				assert.Equal(t,http.StatusUnauthorized,recorder.Code)
+				assert.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}
@@ -95,12 +96,12 @@ func TestAuth(t *testing.T) {
 			})
 
 			recorder := httptest.NewRecorder()
-			req,err := http.NewRequest(http.MethodGet,authPath,nil)
-			require.NoError(t,err)
-			
-			tc.setupAuth(t,req,server.TokenMaker)
-			server.router.ServeHTTP(recorder,req)
-			tc.responseRecorder(t,recorder)
+			req, err := http.NewRequest(http.MethodGet, authPath, nil)
+			require.NoError(t, err)
+
+			tc.setupAuth(t, req, server.TokenMaker)
+			server.router.ServeHTTP(recorder, req)
+			tc.responseRecorder(t, recorder)
 		})
 	}
 }

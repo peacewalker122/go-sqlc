@@ -2,9 +2,9 @@ package gapi
 
 import (
 	"context"
-	db "sqlc/db/sqlc"
-	"sqlc/pb"
-	"sqlc/util"
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/pb"
+	"github.com/peacewalker122/go-sqlc/util"
 
 	"github.com/lib/pq"
 	"google.golang.org/grpc/codes"
@@ -15,7 +15,7 @@ func (s *server) CreateUser(c context.Context, req *pb.CreateUserRequest) (*pb.R
 
 	pass, err := util.HashPassword(req.Password)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot hashing password due: ", err)
+		return nil, status.Errorf(codes.Internal, "cannot hashing password due: %v", err)
 	}
 	arg := db.CreateUserParams{
 		Username:       req.Username,
@@ -29,10 +29,10 @@ func (s *server) CreateUser(c context.Context, req *pb.CreateUserRequest) (*pb.R
 		if PqErr, ok := err.(*pq.Error); ok {
 			switch PqErr.Code.Name() {
 			case "unique_violation":
-				return nil, status.Errorf(codes.AlreadyExists, "username already exist ", err)
+				return nil, status.Errorf(codes.AlreadyExists, "username already exist: %v", err)
 			}
 		}
-		return nil, status.Errorf(codes.Internal, "cannot Create User due: ", err)
+		return nil, status.Errorf(codes.Internal, "cannot Create User due: %v", err)
 	}
 	resp := &pb.ResponseUser{
 		User: convert(account),

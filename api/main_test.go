@@ -2,22 +2,23 @@ package api
 
 import (
 	"os"
-	db "sqlc/db/sqlc"
-	"sqlc/util"
 	"testing"
 	"time"
+
+	db "github.com/peacewalker122/go-sqlc/db/sqlc"
+	"github.com/peacewalker122/go-sqlc/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
 
-func NewTestServer(t *testing.T,store db.Store) *server{
+func NewTestServer(t *testing.T, store db.Store) *server {
 	config := util.Config{
 		SymmectricKey: util.Randomstring(32),
-		Duration: time.Minute,
+		Duration:      time.Minute,
 	}
-	server,err := Newserver(config,store)
-	require.NoError(t,err)
+	server, err := Newserver(config, store)
+	require.NoError(t, err)
 
 	return server
 }
