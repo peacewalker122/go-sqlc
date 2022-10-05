@@ -36,20 +36,20 @@ func (s *server) Login(c context.Context, req *pb.LoginRequest) (*pb.LoginRespon
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Cannot Create Refresh Payload")
 	}
-
+	
+	mtdt := s.extractMetadata(c)
 	session, err := s.store.CreateSession(c, db.CreateSessionParams{
 		ID:           RefreshPayload.ID,
 		Username:     res.Username,
 		RefreshToken: RefreshToken,
-		UserAgent:    "",
-		ClientIp:     "",
+		UserAgent:    mtdt.HostName,
+		ClientIp:     mtdt.ClientIP,
 		IsBlocked:    false,
 		ExpiresAt:    RefreshPayload.ExpiredAt,
 	})
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Cannot Create Session")
 	}
-
 	rsp := pb.LoginResponse{
 		User:                  convert(res),
 		SessionId:             session.ID.String(),

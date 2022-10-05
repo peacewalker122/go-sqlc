@@ -1,9 +1,12 @@
 package token
 
 import (
-	"github.com/peacewalker122/go-sqlc/util"
+	"fmt"
 	"testing"
 	"time"
+
+	"github.com/aead/chacha20poly1305"
+	"github.com/peacewalker122/go-sqlc/util"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/require"
@@ -21,7 +24,7 @@ func TestJWT(t *testing.T) {
 		IssuedAt := time.Now()
 		ExpiredAt := IssuedAt.Add(duration)
 
-		token,payload, err := maker.CreateToken(username, duration)
+		token, payload, err := maker.CreateToken(username, duration)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 		require.NotEmpty(t, payload)
@@ -40,7 +43,7 @@ func TestJWT(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, maker)
 
-		token,payload, err := maker.CreateToken(util.Randomowner(), -time.Minute)
+		token, payload, err := maker.CreateToken(util.Randomowner(), -time.Minute)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 		require.NotEmpty(t, payload)
@@ -53,7 +56,7 @@ func TestJWT(t *testing.T) {
 	t.Run("InvalidKey", func(t *testing.T) {
 		maker, err := NewJWTmaker(util.Randomstring(31))
 		require.Error(t, err)
-		require.EqualError(t, err, WrongKey.Error())
+		require.EqualError(t, err, fmt.Errorf("invalid Key Size must be %v length", minSecretKeySize).Error())
 		require.Nil(t, maker)
 	})
 	t.Run("InvalidJWT_TokenAlgNone", func(t *testing.T) {
@@ -86,7 +89,7 @@ func TestPaseto(t *testing.T) {
 		IssuedAt := time.Now()
 		ExpiredAt := IssuedAt.Add(duration)
 
-		token,payload, err := maker.CreateToken(username, duration)
+		token, payload, err := maker.CreateToken(username, duration)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 		require.NotEmpty(t, payload)
@@ -105,7 +108,7 @@ func TestPaseto(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, maker)
 
-		token,payload, err := maker.CreateToken(util.Randomowner(), -time.Minute)
+		token, payload, err := maker.CreateToken(util.Randomowner(), -time.Minute)
 		require.NoError(t, err)
 		require.NotEmpty(t, token)
 		require.NotEmpty(t, payload)
@@ -118,11 +121,10 @@ func TestPaseto(t *testing.T) {
 	t.Run("Invalid Token", func(t *testing.T) {
 		maker, err := NewPasetoMaker(util.Randomstring(1))
 		require.Error(t, err)
-		require.EqualError(t,err,Pasetoerr.Error())
+		require.EqualError(t, err, fmt.Errorf("invalid key size, must be equal to %v characters", chacha20poly1305.KeySize).Error())
 		require.Nil(t, maker)
 
 		//not implemented yet.
-		
 
 	})
 }

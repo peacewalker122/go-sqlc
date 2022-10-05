@@ -2,6 +2,7 @@ package token
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -17,20 +18,20 @@ type JWTmaker struct {
 
 func NewJWTmaker(secretkey string) (Maker, error) {
 	if len(secretkey) < minSecretKeySize {
-		return nil, WrongKey
+		return nil, fmt.Errorf("invalid Key Size must be %v length", minSecretKeySize)
 	}
 	return &JWTmaker{secretkey}, nil
 }
 
-func (j *JWTmaker) CreateToken(username string, duration time.Duration) (string,*Payload, error) {
+func (j *JWTmaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
 	payload, err := Newpayload(username, duration)
 	if err != nil {
-		return "",payload, err
+		return "", payload, err
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-	token,err := jwtToken.SignedString([]byte(j.secretkey))
-	return token,payload,err
+	token, err := jwtToken.SignedString([]byte(j.secretkey))
+	return token, payload, err
 }
 
 // VerifyToken implements Maker

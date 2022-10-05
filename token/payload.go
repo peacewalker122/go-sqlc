@@ -2,19 +2,15 @@ package token
 
 import (
 	"errors"
-	"fmt"
-	"log"
 	"time"
 
-	"github.com/aead/chacha20poly1305"
 	uuid "github.com/google/uuid"
 )
 
 var (
 	ErrToken   = errors.New("token invalid")
 	ErrExpired = errors.New("token expired")
-	WrongKey   = fmt.Errorf("invalid Key Size must be %v length", minSecretKeySize)
-	Pasetoerr  = fmt.Errorf("invalid key size, must be equal to %v characters", chacha20poly1305.KeySize)
+	ErrFoo     = errors.New("foo")
 )
 
 type Payload struct {
@@ -29,7 +25,7 @@ func Newpayload(username string, duration time.Duration) (*Payload, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println(duration)
+
 	payload := &Payload{
 		ID:        token,
 		Username:  username,

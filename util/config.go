@@ -20,9 +20,10 @@ type Config struct {
 func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
+	// i don't know why viper can't read env file so i tried to change it into json format and it works properly.
 	viper.SetConfigType("json")
-	
-	log.Println("file: ",viper.ConfigFileUsed())
+
+	log.Println("file: ", viper.ConfigFileUsed())
 
 	viper.AutomaticEnv()
 
