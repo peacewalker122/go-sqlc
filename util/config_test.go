@@ -6,10 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const path = "/home/servumtopia/CODE/GO/sqlc"
-
 func TestViper(t *testing.T) {
-	c, err := LoadConfig(path)
+	c, err := LoadConfig("..")
 	assert.NotEmpty(t, c.DBDriver)
 	assert.NoError(t, err)
 	assert.NotEmpty(t, c.Duration)
