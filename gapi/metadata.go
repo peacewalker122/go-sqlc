@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	hostname = "grpcgateway-user-agent"
+	hostname  = "grpcgateway-user-agent"
 	useragent = "user-agent"
-	clientip = "x-forwarded-for"
+	clientip  = "x-forwarded-for"
 )
 
 type Metadata struct {
@@ -32,7 +32,7 @@ func (s *server) extractMetadata(ctx context.Context) *Metadata {
 			mtdt.ClientIP = resp[0]
 		}
 	}
-	if p,ok := peer.FromContext(ctx); ok{
+	if p, ok := peer.FromContext(ctx); ok {
 		mtdt.ClientIP = p.Addr.String()
 	}
 

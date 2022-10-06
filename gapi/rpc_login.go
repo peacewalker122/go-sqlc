@@ -8,12 +8,18 @@ import (
 	"github.com/peacewalker122/go-sqlc/pb"
 	"github.com/peacewalker122/go-sqlc/util"
 
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (s *server) Login(c context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	validation := validateLogin(req)
+	if validation != nil {
+		return nil, InvalidArgument(validation)
+	}
+
 	res, err := s.store.GetUser(c, req.Username)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -36,7 +42,7 @@ func (s *server) Login(c context.Context, req *pb.LoginRequest) (*pb.LoginRespon
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "Cannot Create Refresh Payload")
 	}
-	
+
 	mtdt := s.extractMetadata(c)
 	session, err := s.store.CreateSession(c, db.CreateSessionParams{
 		ID:           RefreshPayload.ID,
@@ -59,4 +65,14 @@ func (s *server) Login(c context.Context, req *pb.LoginRequest) (*pb.LoginRespon
 		RefreshTokenExpiresAt: timestamppb.New(RefreshPayload.ExpiredAt),
 	}
 	return &rsp, nil
+}
+
+func validateLogin(req *pb.LoginRequest) (violation []*errdetails.BadRequest_FieldViolation) {
+	if err := validateUsername(req.Username); err != nil {
+		violation = append(violation, fieldValidation("username", err))
+	}
+	if err := validatePassword(req.Password); err != nil {
+		violation = append(violation, fieldValidation("password", err))
+	}
+	return violation
 }
