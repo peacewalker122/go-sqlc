@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-type Store interface{
+type Store interface {
 	TransferCtx(ctx context.Context, arg TransferctxParams) (TransferTxResult, error)
 	Querier
 }

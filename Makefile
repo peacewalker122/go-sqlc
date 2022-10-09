@@ -32,7 +32,7 @@ server:
 	go run main.go
 	
 mock:
-	 mockgen -package mockdb -destination db/mock/store.go sqlc/db/sqlc Store
+	 mockgen -package mockdb -destination db/mock/store.go github.com/peacewalker122/go-sqlc/db/sqlc Store
 
 grpc:
 	rm -f pb/*.go

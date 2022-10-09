@@ -60,9 +60,11 @@ func gRPCServer(config util.Config, store db.Store) {
 
 func GatewayServer(config util.Config, store db.Store) {
 	server, err := gapi.Newserver(config, store)
+
 	if err != nil {
 		log.Fatal("can't establish server due ", err.Error())
 	}
+
 	gRPCmux := runtime.NewServeMux()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
